@@ -1,0 +1,55 @@
+services:
+  my-sql:
+    container_name: my-sql-container
+    image: mysql:latest
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: jpa_db
+      MYSQL_USER: jpa_user
+      MYSQL_PASSWORD: jpa_password
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    networks:
+      - internalnet
+  jpa_database_backend:
+    container_name: jpa-database-backend-container
+    build: ./jpa_database_backend
+    image: jpa-database-backend-image
+    ports:
+      - "8080:8080"
+    depends_on:
+      - my-sql
+    expose:
+      - "8080"
+    networks:
+      - internalnet
+
+  jpa-database-frontend:
+    container_name: jpa-database-frontend-container
+    build: ./jpa_database_frontend
+    image: jpa-database-frontend-image
+    ports:
+      - "80:80"
+    depends_on:
+      - jpa_database_backend
+    expose:
+      - "80"
+    networks:
+      - internalnet
+
+  maildev:
+    container_name: maildev-container
+    image: maildev/maildev
+    ports:
+      - "1080:1080"
+      - "1025:1025"
+    expose:
+      - "1080"
+      - "1025"
+    networks:
+      - internalnet
+networks:
+  internalnet:
+    driver: bridge
